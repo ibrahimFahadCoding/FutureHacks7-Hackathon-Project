@@ -4,11 +4,12 @@ import time
 
 st.title("🗂️ Task Manager")
 username = st.session_state.get("username", "guest")
+st.session_state.tasks = get_user_tasks(username)
 
 colors = {"High": "red", "Medium": "orange", "Low": "green"}
 
-if "tasks" not in st.session_state:
-    st.session_state.tasks = get_user_tasks(username)
+if not st.session_state.tasks:
+    st.info("No Tasks Saved")
 
 task = st.text_input("Enter Task Name")
 priority = st.selectbox("Priority", ["Low", "Medium", "High"])

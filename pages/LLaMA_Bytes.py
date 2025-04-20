@@ -12,9 +12,8 @@ import PyPDF2 as pypdf
 
 #Page Config with Env Variables
 st.set_page_config(page_title="LLaMA Bytes", layout="centered", page_icon="📝")
-st.title("📝 LLaMA Bytes")
-st.caption("""For those of you with the attention span of a goldfish, 
-you can upload an image or take a photo and get a clean summary!""")
+st.title("🦙 LLaMA Bytes")
+st.caption("""Gimme whatever it is you don't understand and get back a summary! 📝""")
 
 together_client = Together(api_key="5bd126d37c96a0f67f1e75a0ae0f8f959fcee795b32df2fedd56547e5127b7dd")
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/Users/ayeshabuland/Downloads/lockin.json"
@@ -119,8 +118,8 @@ if 'extracted_text' in locals() and extracted_text:
             try:
                 summary_prompt = f"""You are a helpful AI that summarizes educational content for students. 
                 Here is the block of text {extracted_text}. Summarize the key concepts in 
-                **bullet point format** using clear, student-friendly language. Keep things short and concise, and also 
-                explain any complex equations and diagrams in the summary."""
+                **bullet point format** using clear, student-friendly language, so basically make a summary for 
+                dummies."""
 
                 summary_md = llama_chat(summary_prompt)
                 st.subheader("AI Generated Summary")
