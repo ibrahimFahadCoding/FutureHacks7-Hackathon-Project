@@ -18,13 +18,13 @@ st.caption("""Gimme whatever it is you don't understand and get back a summary! 
 
 together_client = Together(api_key="5bd126d37c96a0f67f1e75a0ae0f8f959fcee795b32df2fedd56547e5127b7dd")
 
-load_dotenv()
-creds_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+google_creds = st.secrets["google_credentials"]
+private_key = google_creds["private_key"]
+project_id = google_creds["project_id"]
+client_email = google_creds["client_email"]
+client_id = google_creds["client_id"]
 
-if creds_path:
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = creds_path
-else:
-    st.error("Creds not found")
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = private_key
 
 #Initialize LLaMA
 def llama_chat(prompt, system=None):
