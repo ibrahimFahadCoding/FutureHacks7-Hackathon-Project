@@ -63,7 +63,7 @@ def save_markdown_pdf(md_text, title, filename):
     </html>
     """
 
-    downloads_path = str(Path.home() / "Downloads")
+    downloads_path = "/tmp/"
     full_path = os.path.join(downloads_path, filename)
     HTML(string=styled_html).write_pdf(full_path)
     return full_path
