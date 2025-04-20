@@ -2,8 +2,8 @@ import streamlit as st
 from together import Together
 
 #Page Config with Together API Setup
-st.set_page_config(page_title="LLaMA Bot", layout="centered", page_icon="🦙")
-st.title("💬 LLaMA Chatbot")
+st.set_page_config(page_title="Mind Bot", layout="centered", page_icon="🦙")
+st.title("💬 Mind Chatbot")
 
 together_client = Together(api_key="5bd126d37c96a0f67f1e75a0ae0f8f959fcee795b32df2fedd56547e5127b7dd")
 
@@ -19,7 +19,7 @@ for msg in st.session_state.chat_history:
         with st.chat_message("user", avatar="🙂"):
             st.markdown(msg["content"])
     elif msg["role"] == "assistant":
-        with st.chat_message("assistant", avatar="🦙"):
+        with st.chat_message("assistant", avatar="🧠"):
             st.markdown(msg["content"])
 
 #Chat Input
@@ -30,7 +30,7 @@ if user_input:
         st.markdown(user_input)
 
     #Generate AI Response
-    with st.chat_message("assistant", avatar="🦙"):
+    with st.chat_message("assistant", avatar="🧠"):
         with st.spinner("Thinking..."):
             try:
                 response = together_client.chat.completions.create(

@@ -3,7 +3,7 @@ from utils.auth import create_user, authenticate
 
 #Page Setup
 st.set_page_config(page_title="Login/Register", layout="centered")
-st.title("Welcome to LLaMA Bytes")
+st.title("Welcome to Mindframe")
 st.caption("Create a User or Login!")
 
 #Check if User is Logged in

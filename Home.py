@@ -1,13 +1,13 @@
 import streamlit as st
-st.title("LLaMABox")
+st.title("Mindframe")
 st.caption("The mishmash of sick study tools!")
 
 st.markdown("""
-LLaMABox is designed to be a study-app for everyone, which a bunch of sick features such as:
+Mindframe is designed to be a study-app for everyone, which a bunch of sick features such as:
 
-- **LLaMA Bytes**: Take a Photo, Upload an Image or Upload a PDF and get a clean summary that explains things in human language.
-- **LLaMA Bot** If anything goes above youur head, don't hesitate to ask about anything!
-- **LLaMA Tasks** Organize tasks with color coded priority tags, makes it visually easier to see your most important tasks!
+- **Mind Bytes**: Take a Photo, Upload an Image or Upload a PDF and get a clean summary that explains things in human language.
+- **Mind Bot** If anything goes above youur head, don't hesitate to ask about anything!
+- **Mind Tasks** Organize tasks with color coded priority tags, makes it visually easier to see your most important tasks!
 
 A whole hub, all in one place! 
 """)

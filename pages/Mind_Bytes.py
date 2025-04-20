@@ -11,8 +11,8 @@ from utils.db import save_summary
 import PyPDF2 as pypdf
 
 #Page Config with Env Variables
-st.set_page_config(page_title="LLaMA Bytes", layout="centered", page_icon="📝")
-st.title("🦙 LLaMA Bytes")
+st.set_page_config(page_title="Mind Bytes", layout="centered", page_icon="📝")
+st.title("Mind Bytes")
 st.caption("""Gimme whatever it is you don't understand and get back a summary! 📝""")
 
 together_client = Together(api_key="5bd126d37c96a0f67f1e75a0ae0f8f959fcee795b32df2fedd56547e5127b7dd")
