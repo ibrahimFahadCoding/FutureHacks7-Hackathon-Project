@@ -16,7 +16,7 @@ st.title("Mind Bytes")
 st.caption("""Gimme whatever it is you don't understand and get back a summary! 📝""")
 
 together_client = Together(api_key="5bd126d37c96a0f67f1e75a0ae0f8f959fcee795b32df2fedd56547e5127b7dd")
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/Users/ayeshabuland/Downloads/lockin.json"
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./lockin.json"
 
 if not os.path.exists(os.environ["GOOGLE_APPLICATION_CREDENTIALS"]):
     st.error("Could not find Service Account JSON at specified path!")
