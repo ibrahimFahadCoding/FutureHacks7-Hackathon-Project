@@ -10,6 +10,7 @@ import re
 from utils.db import save_summary
 import PyPDF2 as pypdf
 from dotenv import load_dotenv
+from google.oauth2 import service_account
 
 #Page Config with Env Variables
 st.set_page_config(page_title="Mind Bytes", layout="centered", page_icon="📝")
@@ -18,13 +19,10 @@ st.caption("""Gimme whatever it is you don't understand and get back a summary! 
 
 together_client = Together(api_key="5bd126d37c96a0f67f1e75a0ae0f8f959fcee795b32df2fedd56547e5127b7dd")
 
-google_creds = st.secrets["google_credentials"]
-private_key = google_creds["private_key"]
-project_id = google_creds["project_id"]
-client_email = google_creds["client_email"]
-client_id = google_creds["client_id"]
+googlecreds = dict(st.secrets["google_credentials"])
+creds = service_account.Credentials.from_service_account_info(googlecreds)
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = private_key
+
 
 #Initialize LLaMA
 def llama_chat(prompt, system=None):
@@ -104,7 +102,7 @@ if image_bytes:
     image = vision.Image(content=image_bytes)
     st.subheader("Extracting Text...")
     try:
-        client = vision.ImageAnnotatorClient()
+        client = vision.ImageAnnotatorClient(credentials=creds)
         response = client.document_text_detection(image=image)
         texts = response.text_annotations
         if texts:
