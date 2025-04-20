@@ -1,0 +1,133 @@
+import streamlit as st
+from google.cloud import vision
+from together import Together
+from PIL import Image
+import os
+from pathlib import Path
+import markdown
+from weasyprint import HTML
+import re
+from utils.db import save_summary
+
+#Page Config with Env Variables
+st.set_page_config(page_title="LLaMA Bytes", layout="centered", page_icon="📝")
+st.title("📝 LLaMA Bytes")
+st.caption("""For those of you with the attention span of a goldfish, 
+you can upload an image or take a photo and get a clean summary!""")
+
+together_client = Together(api_key="5bd126d37c96a0f67f1e75a0ae0f8f959fcee795b32df2fedd56547e5127b7dd")
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/Users/ayeshabuland/Downloads/lockin.json"
+
+if not os.path.exists(os.environ["GOOGLE_APPLICATION_CREDENTIALS"]):
+    st.error("Could not find Service Account JSON at specified path!")
+
+#Get Photo
+photo_option = st.radio("Choose how you'd like to capture the text: ", ["Upload an Image", "Take Live Photo"])
+
+image_bytes = None
+
+if photo_option == "Upload an Image":
+    uploaded_file = st.file_uploader("Upload Image ", type=["jpg","jpeg","png"])
+    if uploaded_file:
+        st.image(uploaded_file, caption="Uploaded Image", use_container_width=True)
+        image_bytes = uploaded_file.read()
+
+elif photo_option == "Take Live Photo":
+    cam_input = st.camera_input("Snap a Pic with the Camera")
+    if cam_input:
+        st.image(cam_input, caption="Captured Image", use_container_width=True)
+        image_bytes = cam_input.getvalue()
+
+#Extract Text with Google Vision API
+if image_bytes:
+    image = vision.Image(content=image_bytes)
+    st.subheader("Extracting Text...")
+    try:
+        client = vision.ImageAnnotatorClient()
+        response = client.document_text_detection(image=image)
+        texts = response.text_annotations
+        if texts:
+            extracted_text = texts[0].description
+            st.text_area("Extracted Text", extracted_text, height=200)
+        else:
+            st.error("No Text Found")
+            st.stop()
+    except Exception as e:
+        st.error(f"Google Vision Error: {e}")
+        st.stop()
+
+    #Initialize LLaMA
+    def llama_chat(prompt, system=None):
+        msgs = []
+        if system:
+            msgs.append({"role": "system", "content": system})
+        msgs.append({"role": "user", "content": prompt})
+
+        llama_response = together_client.chat.completions.create(
+            model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
+            messages=msgs,
+            temperature=0.4
+        )
+        return llama_response.choices[0].message.content
+
+    #Get Summary + PDF
+    def save_markdown_pdf(md_text, title, filename):
+        html = markdown.markdown(md_text, extensions=["fenced_code", "tables"])
+        styled_html = f"""
+        <html>
+        <head>
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    padding: 2em;
+                    line-height: 1.6;
+                }}
+                h1 {{
+                    font-size: 24px;
+                    font-weight: bold;
+                }}
+            </style>
+        </head>
+        <body>
+            <h1>{title}</h1>
+            {html}
+        </body>
+        </html>
+        """
+
+        downloads_path = str(Path.home() / "Downloads")
+        full_path = os.path.join(downloads_path, filename)
+        HTML(string=styled_html).write_pdf(full_path)
+        return full_path
+
+    if st.button("Generate Summary with LLaMA 3"):
+        with st.spinner("Generating Summary..."):
+            try:
+                summary_prompt = f"""You are a helpful AI that summarizes educational content for students. 
+                Here is the block of text {extracted_text}. Summarize the key concepts in 
+                **bullet point format** using clear, student-friendly language. Also explain any complex equations and 
+                diagrams in the summary."""
+
+                summary_md = llama_chat(summary_prompt)
+                st.subheader("AI Generated Notes")
+                st.markdown(summary_md)
+
+                title_prompt = f"""Give a short and clear title (max 6 words) for the 
+                following study summary. Avoid Quotation marks or punctuation. 
+                Summary: {summary_md}"""
+
+                raw_title = llama_chat(title_prompt)
+                clean_title = re.sub(r'\W+', '_', raw_title.strip().lower())[:40]
+                pdf_filename = f"summary_{clean_title}.pdf"
+
+                #Save to DB
+                username = st.session_state.get("username", "guest")
+                save_summary(username, raw_title.strip(), summary_md)
+
+                pdf_path = save_markdown_pdf(summary_md, raw_title.strip(), pdf_filename)
+
+                st.success(f"PDF Saved as `{pdf_filename}` in your Downloads Folder!")
+                with open(pdf_path, "rb") as f:
+                    st.download_button("Download PDF", data=f, file_name=pdf_filename, mime="application/pdf")
+            except Exception as e:
+                st.error(f"Error Generating Summary: {e}")

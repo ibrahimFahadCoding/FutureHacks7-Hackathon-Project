@@ -1,4 +1,7 @@
 streamlit~=1.44.1
-boto3~=1.37.28
-psycopg2-binary~=2.9.10
+together~=1.5.5
+Markdown~=3.8
+protobuf~=5.29.4
 pillow~=11.1.0
+pathlib~=1.0.1
+weasyprint~=65.0
