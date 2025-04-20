@@ -142,7 +142,7 @@ if 'extracted_text' in locals() and extracted_text:
 
                 pdf_path = save_markdown_pdf(summary_md, raw_title.strip(), pdf_filename)
 
-                st.success(f"PDF Saved as `{pdf_filename}` in your Downloads Folder!")
+                st.success(f"PDF Generated as `{pdf_filename}`!")
                 with open(pdf_path, "rb") as f:
                     st.download_button("Download PDF", data=f, file_name=pdf_filename, mime="application/pdf")
             except Exception as e:
