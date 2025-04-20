@@ -8,7 +8,7 @@ st.caption("Create a User or Login!")
 
 #Check if User is Logged in
 if 'username' in st.session_state:
-    st.success(f"Welcome back, {st.session_state["username"]}!")
+    st.success(f"Welcome back, {st.session_state['username']}!")
     st.button("Log Out", on_click=lambda: st.session_state.pop('username', None))
 else:
     #Page Select (Login/Register)
