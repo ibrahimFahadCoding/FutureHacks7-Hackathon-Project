@@ -8,6 +8,7 @@ import markdown
 from weasyprint import HTML
 import re
 from utils.db import save_summary
+import PyPDF2 as pypdf
 
 #Page Config with Env Variables
 st.set_page_config(page_title="LLaMA Bytes", layout="centered", page_icon="📝")
@@ -21,10 +22,55 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/Users/ayeshabuland/Downloads/lo
 if not os.path.exists(os.environ["GOOGLE_APPLICATION_CREDENTIALS"]):
     st.error("Could not find Service Account JSON at specified path!")
 
+#Initialize LLaMA
+def llama_chat(prompt, system=None):
+    msgs = []
+    if system:
+        msgs.append({"role": "system", "content": system})
+    msgs.append({"role": "user", "content": prompt})
+
+    llama_response = together_client.chat.completions.create(
+        model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
+        messages=msgs,
+        temperature=0.4
+    )
+    return llama_response.choices[0].message.content
+
+#Get Summary + PDF
+def save_markdown_pdf(md_text, title, filename):
+    html = markdown.markdown(md_text, extensions=["fenced_code", "tables"])
+    styled_html = f"""
+    <html>
+    <head>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                padding: 2em;
+                line-height: 1.6;
+            }}
+            h1 {{
+                font-size: 24px;
+                font-weight: bold;
+            }}
+        </style>
+    </head>
+    <body>
+        <h1>{title}</h1>
+        {html}
+    </body>
+    </html>
+    """
+
+    downloads_path = str(Path.home() / "Downloads")
+    full_path = os.path.join(downloads_path, filename)
+    HTML(string=styled_html).write_pdf(full_path)
+    return full_path
+
 #Get Photo
-photo_option = st.radio("Choose how you'd like to capture the text: ", ["Upload an Image", "Take Live Photo"])
+photo_option = st.radio("Choose how you'd like to capture the text: ", ["Upload an Image", "Take Live Photo", "Upload PDF"])
 
 image_bytes = None
+extracted_text = ""
 
 if photo_option == "Upload an Image":
     uploaded_file = st.file_uploader("Upload Image ", type=["jpg","jpeg","png"])
@@ -37,6 +83,17 @@ elif photo_option == "Take Live Photo":
     if cam_input:
         st.image(cam_input, caption="Captured Image", use_container_width=True)
         image_bytes = cam_input.getvalue()
+
+elif photo_option == "Upload PDF":
+    uploaded_pdf = st.file_uploader("Upload a PDF", type=["pdf"])
+    if uploaded_pdf:
+        extracted_text = ""
+        reader = pypdf.PdfReader(uploaded_pdf)
+        for page in reader.pages:
+            extracted_text += page.extract_text() or ""
+        st.text_area("Extracted Text from PDF", extracted_text, height=200)
+
+
 
 #Extract Text with Google Vision API
 if image_bytes:
@@ -56,60 +113,17 @@ if image_bytes:
         st.error(f"Google Vision Error: {e}")
         st.stop()
 
-    #Initialize LLaMA
-    def llama_chat(prompt, system=None):
-        msgs = []
-        if system:
-            msgs.append({"role": "system", "content": system})
-        msgs.append({"role": "user", "content": prompt})
-
-        llama_response = together_client.chat.completions.create(
-            model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
-            messages=msgs,
-            temperature=0.4
-        )
-        return llama_response.choices[0].message.content
-
-    #Get Summary + PDF
-    def save_markdown_pdf(md_text, title, filename):
-        html = markdown.markdown(md_text, extensions=["fenced_code", "tables"])
-        styled_html = f"""
-        <html>
-        <head>
-            <style>
-                body {{
-                    font-family: Arial, sans-serif;
-                    padding: 2em;
-                    line-height: 1.6;
-                }}
-                h1 {{
-                    font-size: 24px;
-                    font-weight: bold;
-                }}
-            </style>
-        </head>
-        <body>
-            <h1>{title}</h1>
-            {html}
-        </body>
-        </html>
-        """
-
-        downloads_path = str(Path.home() / "Downloads")
-        full_path = os.path.join(downloads_path, filename)
-        HTML(string=styled_html).write_pdf(full_path)
-        return full_path
-
+if 'extracted_text' in locals() and extracted_text:
     if st.button("Generate Summary with LLaMA 3"):
         with st.spinner("Generating Summary..."):
             try:
                 summary_prompt = f"""You are a helpful AI that summarizes educational content for students. 
                 Here is the block of text {extracted_text}. Summarize the key concepts in 
-                **bullet point format** using clear, student-friendly language. Also explain any complex equations and 
-                diagrams in the summary."""
+                **bullet point format** using clear, student-friendly language. Keep things short and concise, and also 
+                explain any complex equations and diagrams in the summary."""
 
                 summary_md = llama_chat(summary_prompt)
-                st.subheader("AI Generated Notes")
+                st.subheader("AI Generated Summary")
                 st.markdown(summary_md)
 
                 title_prompt = f"""Give a short and clear title (max 6 words) for the 
