@@ -9,6 +9,7 @@ from weasyprint import HTML
 import re
 from utils.db import save_summary
 import PyPDF2 as pypdf
+from dotenv import load_dotenv
 
 #Page Config with Env Variables
 st.set_page_config(page_title="Mind Bytes", layout="centered", page_icon="📝")
@@ -16,10 +17,14 @@ st.title("Mind Bytes")
 st.caption("""Gimme whatever it is you don't understand and get back a summary! 📝""")
 
 together_client = Together(api_key="5bd126d37c96a0f67f1e75a0ae0f8f959fcee795b32df2fedd56547e5127b7dd")
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./lockin.json"
 
-if not os.path.exists(os.environ["GOOGLE_APPLICATION_CREDENTIALS"]):
-    st.error("Could not find Service Account JSON at specified path!")
+load_dotenv()
+creds_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+
+if creds_path:
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = creds_path
+else:
+    st.error("Creds not found")
 
 #Initialize LLaMA
 def llama_chat(prompt, system=None):
