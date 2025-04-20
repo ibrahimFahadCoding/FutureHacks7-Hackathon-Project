@@ -16,7 +16,7 @@ if not summaries:
     st.info("No Notes Saved Yet.")
 else:
     for idx, s in enumerate(summaries):
-        with st.expander(f"{s["title"]}"):
+        with st.expander(f"{s['title']}"):
             st.markdown(s["summary"])
             if st.button("Delete", key=f"del_{idx}"):
                 summaries.pop(idx)
