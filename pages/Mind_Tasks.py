@@ -14,9 +14,7 @@ priority_dict = {
     "Low": '<span style="display:inline-block; width:20px; height:20px; background-color:green;"></span>',
 }
 
-if not st.session_state.tasks:
-    st.info("No Tasks Saved")
-
+# Display form to add tasks
 task = st.text_input("Enter Task Name")
 priority = st.selectbox("Priority", ["Low", "Medium", "High"])
 if st.button("Add Task") and task.strip():
@@ -24,27 +22,54 @@ if st.button("Add Task") and task.strip():
     save_user_tasks(username, st.session_state.tasks)
     st.rerun()
 
-for i, j in enumerate(st.session_state.tasks):
-    with col1:
-        if j["done"]:
-            # Display the task with the color-coded square for completed tasks
-            text = f'<span style="font-size: 25px;">{priority_dict[j["priority"]]} Task Completed! </span> <span style="font-size:25px; text-decoration:line-through;"> {j["task"]}</span>'
-            st.markdown(text, unsafe_allow_html=True)
-        else:
-            # Display the task with the color-coded square for tasks that are not completed
-            text = f'<span style="font-size: 25px;">{priority_dict[j["priority"]]} {j["task"]}</span>'
+# Separate tasks into pending and completed
+pending_tasks = [t for t in st.session_state.tasks if not t["done"]]
+completed_tasks = [t for t in st.session_state.tasks if t["done"]]
+
+# Display Pending Tasks
+if pending_tasks:
+    st.subheader("Pending Tasks")
+    for i, task in enumerate(pending_tasks):
+        with col1:
+            text = f'<span style="font-size: 25px;">{priority_dict[task["priority"]]} {task["task"]}</span>'
             st.markdown(text, unsafe_allow_html=True)
 
-    with col2:
-        if st.button("✅", key=f"done_{i}"):
-            if not j["done"]:
-                j["done"] = True
+        with col2:
+            if st.button("✅", key=f"done_{i}"):
+                task["done"] = True
                 st.success("Good Job! Task Completed!")
+                save_user_tasks(username, st.session_state.tasks)
                 time.sleep(1)
                 st.rerun()
 
-    with col3:
-        if st.button("🗑️", key=f"del_{i}"):
-            st.session_state.tasks.pop(i)
-            save_user_tasks(username, st.session_state.tasks)
-            st.rerun()
+        with col3:
+            if st.button("🗑️", key=f"del_{i}"):
+                st.session_state.tasks.remove(task)
+                save_user_tasks(username, st.session_state.tasks)
+                st.rerun()
+
+# Display Completed Tasks
+if completed_tasks:
+    st.subheader("Completed Tasks")
+    for i, task in enumerate(completed_tasks):
+        with col1:
+            text = f'<span style="font-size: 25px;">{priority_dict[task["priority"]]} Task Completed! </span> <span style="font-size:25px; text-decoration:line-through;"> {task["task"]}</span>'
+            st.markdown(text, unsafe_allow_html=True)
+
+        with col2:
+            if st.button("❌ Undo", key=f"undo_{i}"):
+                task["done"] = False
+                st.success("Task has been marked as pending!")
+                save_user_tasks(username, st.session_state.tasks)
+                time.sleep(1)
+                st.rerun()
+
+        with col3:
+            if st.button("🗑️", key=f"del_completed_{i}"):
+                st.session_state.tasks.remove(task)
+                save_user_tasks(username, st.session_state.tasks)
+                st.rerun()
+
+# If no tasks exist
+if not st.session_state.tasks:
+    st.info("No Tasks Saved")
