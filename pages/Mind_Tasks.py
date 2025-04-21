@@ -2,7 +2,7 @@ import streamlit as st
 from utils.db import get_user_tasks, save_user_tasks
 import time
 
-st.title("🗂️ Task Manager")
+st.title("🗂️ Mind Tasks")
 col1, col2, col3 = st.columns([8, 1, 1])
 username = st.session_state.get("username", "guest")
 st.session_state.tasks = get_user_tasks(username)
