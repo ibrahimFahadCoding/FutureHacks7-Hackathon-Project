@@ -2,7 +2,7 @@ import streamlit as st
 from together import Together
 
 #Page Config with Together API Setup
-st.set_page_config(page_title="Mind Bot", layout="centered", page_icon="🦙")
+st.set_page_config(page_title="Mind Bot", layout="centered")
 st.title("💬 Mind Chatbot")
 
 together_client = Together(api_key="5bd126d37c96a0f67f1e75a0ae0f8f959fcee795b32df2fedd56547e5127b7dd")
@@ -10,8 +10,9 @@ together_client = Together(api_key="5bd126d37c96a0f67f1e75a0ae0f8f959fcee795b32d
 #Initialize Chat History
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = [
-        {"role": "system", "content": """You are a helpful, friendly AI whos job is to answer questions about anything. "
-        Feel free to add in a little humor."""}
+        {"role": "system", "content": """You are a helpful, friendly AI whos job is to answer questions about anything. 
+        Feel free to add in a little humor. Explain concepts and provide examples in math, science, and 
+        coding problems."""}
     ]
 
 for msg in st.session_state.chat_history:

@@ -3,6 +3,7 @@ from utils.db import get_user_tasks, save_user_tasks
 import time
 
 st.title("🗂️ Task Manager")
+col1, col2, col3 = st.columns([8, 1, 1])
 username = st.session_state.get("username", "guest")
 st.session_state.tasks = get_user_tasks(username)
 
@@ -18,7 +19,6 @@ if st.button("Add Task") and task.strip():
     save_user_tasks(username, st.session_state.tasks)
     st.rerun()
 for i, j in enumerate(st.session_state.tasks):
-    col1, col2, col3 = st.columns([2, 2, 2])
     with col1:
         text = f'<span style="font-size: 20px; color:{colors[j["priority"]]};">[{j["priority"]}]</span> <span style="font-size:20px;">{j["task"]}</span>'
         st.markdown(text, unsafe_allow_html=True)
