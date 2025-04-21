@@ -2,6 +2,7 @@ import streamlit as st
 from utils.db import get_user_tasks, save_user_tasks
 import time
 
+st.set_page_config(page_title="Mind Tasks", page_icon="🗂️")
 st.title("🗂️ Mind Tasks")
 
 username = st.session_state.get("username", "guest")

@@ -2,7 +2,7 @@ import streamlit as st
 from together import Together
 
 #Page Config with Together API Setup
-st.set_page_config(page_title="Mind Bot", layout="centered")
+st.set_page_config(page_title="Mind Bot", layout="centered", page_icon="💬")
 st.title("💬 Mind Chatbot")
 
 together_client = Together(api_key="5bd126d37c96a0f67f1e75a0ae0f8f959fcee795b32df2fedd56547e5127b7dd")
