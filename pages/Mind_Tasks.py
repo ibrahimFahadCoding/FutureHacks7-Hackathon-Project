@@ -39,7 +39,7 @@ if pending_tasks:
                 task["done"] = True
                 st.success("Good Job! Task Completed!")
                 save_user_tasks(username, st.session_state.tasks)
-                time.sleep(1)
+                time.sleep(5)
                 st.rerun()
 
         with col3:
@@ -61,7 +61,7 @@ if completed_tasks:
                 task["done"] = False
                 st.success("Task has been marked as pending!")
                 save_user_tasks(username, st.session_state.tasks)
-                time.sleep(1)
+                time.sleep(2)
                 st.rerun()
 
         with col3:
