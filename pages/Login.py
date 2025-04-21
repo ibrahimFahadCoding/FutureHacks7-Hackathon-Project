@@ -2,7 +2,7 @@ import streamlit as st
 from utils.auth import create_user, authenticate
 
 #Page Setup
-st.set_page_config(page_title="Login/Register", layout="centered")
+st.set_page_config(page_title="Login/Register", layout="centered", page_icon="🔑")
 st.title("Welcome to Mindframe")
 st.caption("Create a User or Login!")
 
