@@ -3,7 +3,7 @@ from utils.db import get_user_tasks, save_user_tasks
 import time
 
 st.title("🗂️ Mind Tasks")
-col1, col2, col3 = st.columns([8, 1, 1])
+col1, col2, col3 = st.columns([5, 2, 2])
 username = st.session_state.get("username", "guest")
 st.session_state.tasks = get_user_tasks(username)
 
@@ -20,14 +20,14 @@ if st.button("Add Task") and task.strip():
     st.rerun()
 for i, j in enumerate(st.session_state.tasks):
     with col1:
-        text = f'<span style="font-size: 40px; color:{colors[j["priority"]]};">[{j["priority"]}]</span> <span style="font-size:40px;">{j["task"]}</span>'
+        text = f'<span style="font-size: 30px; color:{colors[j["priority"]]};">[{j["priority"]}]</span> <span style="font-size:30px;">{j["task"]}</span>'
         st.markdown(text, unsafe_allow_html=True)
     with col2:
         if st.button("✅", key=f"done_{i}"):
             if not j["done"]:
                 j["done"] = True
-                st.session_state.tasks.pop(i)
-                save_user_tasks(username, st.session_state.tasks)
+                text = f'<span style="font-size: 30px; color:{colors[j["priority"]]};">[* ✅] [{j["priority"]}]</span> <span style="font-size:30px;">{j["task"]}</span>'
+                st.markdown(text, unsafe_allow_html=True)
                 st.success("Good Job! Task Completed!")
                 time.sleep(5)
                 st.rerun()
