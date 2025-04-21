@@ -122,8 +122,8 @@ if 'extracted_text' in locals() and extracted_text:
                 summary_prompt = f"""You are a helpful AI that summarizes educational content for students. 
                 Here is the block of text {extracted_text}. Summarize the key concepts in 
                 **bullet point format** using clear, student-friendly language, so basically make a summary for 
-                dummies. Explain things fully and concisely. Try to use headers and nested bullet points
-                so that its not just aa wall of text."""
+                dummies. Explain things fully and concisely. Try to use just subheaders and nested bullet points
+                so that its not just a wall of text."""
 
                 summary_md = llama_chat(summary_prompt)
                 st.subheader("AI Generated Summary")
