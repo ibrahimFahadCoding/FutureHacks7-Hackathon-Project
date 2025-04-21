@@ -20,7 +20,7 @@ if st.button("Add Task") and task.strip():
     st.rerun()
 for i, j in enumerate(st.session_state.tasks):
     with col1:
-        text = f'<span style="font-size: 20px; color:{colors[j["priority"]]};">[{j["priority"]}]</span> <span style="font-size:20px;">{j["task"]}</span>'
+        text = f'<span style="font-size: 40px; color:{colors[j["priority"]]};">[{j["priority"]}]</span> <span style="font-size:40px;">{j["task"]}</span>'
         st.markdown(text, unsafe_allow_html=True)
     with col2:
         if st.button("✅", key=f"done_{i}"):
