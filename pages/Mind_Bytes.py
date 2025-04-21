@@ -122,7 +122,7 @@ if 'extracted_text' in locals() and extracted_text:
                 summary_prompt = f"""You are a helpful AI that summarizes educational content for students. 
                 Here is the block of text {extracted_text}. Summarize the key concepts in 
                 **bullet point format** using clear, student-friendly language, so basically make a summary for 
-                dummies."""
+                dummies. Make it short and concise."""
 
                 summary_md = llama_chat(summary_prompt)
                 st.subheader("AI Generated Summary")
