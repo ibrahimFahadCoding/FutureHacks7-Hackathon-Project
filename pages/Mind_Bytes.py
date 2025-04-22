@@ -119,10 +119,23 @@ if extracted_text:
     if st.button("Generate Summary with LLaMA 3"):
         with st.spinner("Generating Summary..."):
             try:
-                summary_prompt = f"""You are a helpful AI that summarizes educational content for students. 
-                Here is the block of text {extracted_text}. Summarize the key concepts in 
-                **bullet point format** using clear, student-friendly language. Explain things
-                fully, clearly, and concisely. Use subheaders and nested bullets."""
+                summary_prompt = f"""
+                You are an expert educational assistant that helps students learn by summarizing complex information into clear, organized, and engaging study notes.
+                
+                Summarize the following text using the following format:
+                - Use clear, student-friendly language.
+                - Organize the summary with **meaningful subheadings**.
+                - Present ideas in **concise bullet points**, grouped logically under the subheadings.
+                - Where appropriate, use **nested bullets** to break down more detailed ideas.
+                - Make sure to fully explain key concepts without being overly wordy.
+                - Avoid vague or overly technical language unless necessary—and if so, define it simply.
+                - Focus on the **core ideas and essential information** a student needs to remember.
+                - Do **not copy the text verbatim**—rephrase and explain for clarity and retention.
+                
+                Here is the text to summarize:
+                {extracted_text}
+                """
+
 
                 summary_md = llama_chat(summary_prompt)
                 st.session_state["summary_md"] = summary_md
