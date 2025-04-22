@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 from google.oauth2 import service_account
 import random
 import json
+import time
 
 # Page Config
 st.set_page_config(page_title="Mind Bytes", layout="centered", page_icon="📝")
@@ -145,15 +146,16 @@ if extracted_text:
             except Exception as e:
                 st.error(f"Error Generating Summary: {e}")
 
-# --- Sidebar Games ---
+# --- Sidebar Setup ---
 st.sidebar.subheader("🎮 Play a Study Game")
 
 user_summaries = load_summaries().get(username, [])
 summary_titles = [s["title"] for s in user_summaries]
 
 selected_title = st.sidebar.selectbox("Choose a Summary", ["None"] + summary_titles)
-game_mode = st.sidebar.radio("Choose Game Mode", ["None", "💣 Defuse the Bomb", "🧟 Survival Mode"])
+game_mode = st.sidebar.radio("Choose Game Mode", ["None", "💣 Defuse the Bomb", "😎 Chill Mode"])
 
+# --- Game Setup ---
 def generate_quiz(summary):
     quiz_prompt = f"""Based on this summary, create 10 multiple choice questions. 
 Each question must have 1 correct answer and 3 incorrect answers. Format:
@@ -178,57 +180,85 @@ Summary:
         quiz.append((q, opts, ans))
     return quiz
 
-# Check if a summary is selected and a game mode is chosen
 if selected_title != "None" and game_mode != "None":
-    # Check if the selected title has changed or quiz hasn't been generated yet
-    if "selected_title" not in st.session_state or st.session_state.selected_title != selected_title:
-        selected_summary = next((s for s in user_summaries if s["title"] == selected_title), None)
-        if selected_summary:
+    selected_summary = next((s for s in user_summaries if s["title"] == selected_title), None)
+
+    if selected_summary:
+        if "quiz_id" not in st.session_state or st.session_state.quiz_id != f"{selected_title}_{game_mode}":
             with st.spinner("Generating Questions..."):
                 quiz = generate_quiz(selected_summary["summary"])
                 st.session_state.quiz = quiz
-                st.session_state.selected_title = selected_title
-                st.session_state.answers = [None] * len(quiz)
+                st.session_state.quiz_id = f"{selected_title}_{game_mode}"
+                st.session_state.current_q = 0
                 st.session_state.score = 0
                 st.session_state.lives = 3
-    else:
+
         quiz = st.session_state.quiz
+        curr = st.session_state.current_q
+        total = len(quiz)
 
-
+        # 💣 DEFUSE THE BOMB MODE
         if game_mode == "💣 Defuse the Bomb":
             st.subheader("💣 Defuse the Bomb")
-            score = 0
-            for i, (q, opts, ans) in enumerate(quiz):
-                st.markdown(f"**{i+1}. {q}**")
-                choice = st.radio("", opts, key=f"bomb_{i}")
-                if st.button("Lock Answer", key=f"lock_{i}"):
-                    if opts.index(choice) == ans:
-                        score += 1
-                        st.success("✅ Correct!")
-                    else:
-                        st.error("💥 Boom! Wrong answer.")
-                        break
-            st.info(f"Final Score: {score}/{len(quiz)}")
 
-        elif game_mode == "🧟 Survival Mode":
-            st.subheader("🧟 Survival Mode")
-            lives = st.session_state.lives
-            score = st.session_state.score
-            for i, (q, opts, ans) in enumerate(quiz):
-                st.markdown(f"**{i+1}. {q}**")
-                choice = st.radio("", opts, key=f"survival_{i}")
-                if st.button("Submit", key=f"submit_{i}"):
+            if curr < total and st.session_state.lives > 0:
+                q, opts, ans = quiz[curr]
+                st.markdown(f"### Question {curr + 1} of {total}")
+                st.markdown(f"**{q}**")
+                choice = st.radio("Pick your answer:", opts, key=f"bomb_q_{curr}")
+
+                timer_placeholder = st.empty()
+                locked_key = f"locked_{curr}"
+                start_time = time.time()
+
+                for i in range(10, 0, -1):
+                    if locked_key in st.session_state:
+                        break
+                    timer_placeholder.warning(f"⏱️ Time Left: {i} seconds")
+                    time.sleep(1)
+
+                if st.button("Lock Answer", key=f"lock_{curr}"):
+                    st.session_state[locked_key] = True
+                    if opts.index(choice) == ans:
+                        st.success("✅ Correct! Bomb defused.")
+                        st.session_state.score += 1
+                    else:
+                        st.error(f"💥 Boom! Wrong answer. Correct: **{opts[ans]}**")
+                        st.session_state.lives = 0
+                    st.session_state.current_q += 1
+                    st.rerun()
+
+                elif time.time() - start_time >= 10 and locked_key not in st.session_state:
+                    st.warning("⏰ Time's up!")
+                    st.session_state.lives = 0
+                    st.session_state.current_q += 1
+                    st.rerun()
+
+                st.warning(f"💣 Lives left: {st.session_state.lives}")
+
+            else:
+                if st.session_state.lives <= 0:
+                    st.error("Game Over! The bomb exploded 💥")
+                else:
+                    st.success(f"🎉 You defused all bombs! Score: {st.session_state.score}/{total}")
+
+        # 😎 CHILL MODE
+        elif game_mode == "😎 Chill Mode":
+            st.subheader("😎 Chill Mode")
+
+            if curr < total:
+                q, opts, ans = quiz[curr]
+                st.markdown(f"### Question {curr + 1} of {total}")
+                st.markdown(f"**{q}**")
+                choice = st.radio("Pick your answer:", opts, key=f"chill_q_{curr}")
+
+                if st.button("Submit Answer", key=f"submit_{curr}"):
                     if opts.index(choice) == ans:
                         st.success("✅ Correct!")
-                        score += 1
+                        st.session_state.score += 1
                     else:
-                        st.error("❌ Wrong!")
-                        lives -= 1
-                        if lives == 0:
-                            st.warning("🧟 You didn't survive...")
-                            break
-                    st.session_state.score = score
-                    st.session_state.lives = lives
-                    st.info(f"Lives left: {lives}")
-            if lives > 0:
-                st.success(f"🎉 You survived! Score: {score}/{len(quiz)}")
+                        st.error(f"❌ Oops! Correct answer: **{opts[ans]}**")
+                    st.session_state.current_q += 1
+                    st.rerun()
+            else:
+                st.success(f"😎 Done! Final Score: {st.session_state.score}/{total}")
