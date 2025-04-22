@@ -12,6 +12,7 @@ import PyPDF2 as pypdf
 from dotenv import load_dotenv
 from google.oauth2 import service_account
 import random
+from utils.db import load_summaries
 
 #Page Config with Env Variables
 st.set_page_config(page_title="Mind Bytes", layout="centered", page_icon="📝")
@@ -150,12 +151,19 @@ if 'extracted_text' in locals() and extracted_text:
             except Exception as e:
                 st.error(f"Error Generating Summary: {e}")
 
-# Check if a summary is available
-if "summary_md" in st.session_state and st.session_state.summary_md:
-    st.sidebar.subheader("🎮 Play a Study Game")
+user_summaries = load_summaries().get(username, [])
+
+# Sidebar Game Section
+st.sidebar.subheader("🎮 Play a Study Game")
+
+if not user_summaries:
+    st.sidebar.info("You need at least one saved summary to play!")
+else:
+    summary_titles = [s['title'] for s in user_summaries]
+    selected_title = st.sidebar.selectbox("Choose a Summary", summary_titles)
+    selected_summary = next((s["summary"] for s in user_summaries if s["title"] == selected_title), None)
 
     game_mode = st.sidebar.radio("Choose Game Mode", ["None", "💣 Defuse the Bomb", "🧟 Survival Mode"])
-
 
     def generate_quiz(summary):
         quiz_prompt = f"""Based on this summary, create 10 multiple choice questions. 
@@ -184,13 +192,12 @@ if "summary_md" in st.session_state and st.session_state.summary_md:
             quiz.append((question, options, answer))
         return quiz
 
-
-    if game_mode != "None":
+    if game_mode != "None" and selected_summary:
         with st.spinner("Loading questions..."):
-            quiz = generate_quiz(st.session_state.summary_md)
+            quiz = generate_quiz(selected_summary)
 
         if game_mode == "💣 Defuse the Bomb":
-            st.subheader("💣 Defuse the Bomb")
+            st.subheader(f"💣 Defuse the Bomb: {selected_title}")
             score = 0
             for i, (question, options, answer) in enumerate(quiz):
                 st.markdown(f"**{i + 1}. {question}**")
@@ -205,7 +212,7 @@ if "summary_md" in st.session_state and st.session_state.summary_md:
             st.info(f"Final Score: {score}/{len(quiz)}")
 
         elif game_mode == "🧟 Survival Mode":
-            st.subheader("🧟 Survival Mode")
+            st.subheader(f"🧟 Survival Mode: {selected_title}")
             lives = 3
             score = 0
             for i, (question, options, answer) in enumerate(quiz):
