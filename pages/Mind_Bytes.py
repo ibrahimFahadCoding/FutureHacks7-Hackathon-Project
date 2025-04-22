@@ -121,7 +121,8 @@ if extracted_text:
             try:
                 summary_prompt = f"""You are a helpful AI that summarizes educational content for students. 
                 Here is the block of text {extracted_text}. Summarize the key concepts in 
-                **bullet point format** using clear, student-friendly language. Use subheaders and nested bullets."""
+                **bullet point format** using clear, student-friendly language. Explain things
+                fully, clearly, and concisely. Use subheaders and nested bullets."""
 
                 summary_md = llama_chat(summary_prompt)
                 st.session_state["summary_md"] = summary_md
