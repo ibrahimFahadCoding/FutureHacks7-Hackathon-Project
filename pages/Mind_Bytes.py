@@ -11,6 +11,7 @@ from utils.db import save_summary
 import PyPDF2 as pypdf
 from dotenv import load_dotenv
 from google.oauth2 import service_account
+import random
 
 #Page Config with Env Variables
 st.set_page_config(page_title="Mind Bytes", layout="centered", page_icon="📝")
@@ -148,3 +149,78 @@ if 'extracted_text' in locals() and extracted_text:
                     st.download_button("Download PDF", data=f, file_name=pdf_filename, mime="application/pdf")
             except Exception as e:
                 st.error(f"Error Generating Summary: {e}")
+
+# Check if a summary is available
+if "summary_md" in st.session_state and st.session_state.summary_md:
+    st.sidebar.subheader("🎮 Play a Study Game")
+
+    game_mode = st.sidebar.radio("Choose Game Mode", ["None", "💣 Defuse the Bomb", "🧟 Survival Mode"])
+
+
+    def generate_quiz(summary):
+        quiz_prompt = f"""Based on this summary, create 10 multiple choice questions. 
+        Each question should have 1 correct answer and 3 incorrect options. 
+        Format it like this:
+
+        Q: Question here?
+        A) Option 1
+        B) Option 2
+        C) Option 3
+        D) Option 4
+        Answer: B
+        ---
+        Summary:
+        {summary}
+        """
+
+        response = llama_chat(quiz_prompt)
+        pattern = r"Q: (.*?)\n(A\) .*?)\n(B\) .*?)\n(C\) .*?)\n(D\) .*?)\nAnswer: ([A-D])"
+        matches = re.findall(pattern, response, re.DOTALL)
+        quiz = []
+        for match in matches:
+            question = match[0]
+            options = [match[1][3:], match[2][3:], match[3][3:], match[4][3:]]
+            answer = "ABCD".index(match[5])
+            quiz.append((question, options, answer))
+        return quiz
+
+
+    if game_mode != "None":
+        with st.spinner("Loading questions..."):
+            quiz = generate_quiz(st.session_state.summary_md)
+
+        if game_mode == "💣 Defuse the Bomb":
+            st.subheader("💣 Defuse the Bomb")
+            score = 0
+            for i, (question, options, answer) in enumerate(quiz):
+                st.markdown(f"**{i + 1}. {question}**")
+                choice = st.radio("", options, key=f"bomb_{i}")
+                if st.button("Lock Answer", key=f"lock_{i}"):
+                    if options.index(choice) == answer:
+                        score += 1
+                        st.success("✅ Correct! Bomb defused!")
+                    else:
+                        st.error("💥 Boom! Wrong answer.")
+                        break
+            st.info(f"Final Score: {score}/{len(quiz)}")
+
+        elif game_mode == "🧟 Survival Mode":
+            st.subheader("🧟 Survival Mode")
+            lives = 3
+            score = 0
+            for i, (question, options, answer) in enumerate(quiz):
+                st.markdown(f"**{i + 1}. {question}**")
+                choice = st.radio("", options, key=f"survival_{i}")
+                if st.button("Submit", key=f"submit_{i}"):
+                    if options.index(choice) == answer:
+                        st.success("✅ Correct!")
+                        score += 1
+                    else:
+                        st.error("❌ Wrong!")
+                        lives -= 1
+                        if lives == 0:
+                            st.warning("🧟 You didn't survive...")
+                            break
+                    st.info(f"Lives left: {lives}")
+            if lives > 0:
+                st.success(f"🎉 You survived! Score: {score}/{len(quiz)}")
