@@ -178,11 +178,22 @@ Summary:
         quiz.append((q, opts, ans))
     return quiz
 
+# Check if a summary is selected and a game mode is chosen
 if selected_title != "None" and game_mode != "None":
-    selected_summary = next((s for s in user_summaries if s["title"] == selected_title), None)
-    if selected_summary:
-        with st.spinner("Generating Questions..."):
-            quiz = generate_quiz(selected_summary["summary"])
+    # Check if the selected title has changed or quiz hasn't been generated yet
+    if "selected_title" not in st.session_state or st.session_state.selected_title != selected_title:
+        selected_summary = next((s for s in user_summaries if s["title"] == selected_title), None)
+        if selected_summary:
+            with st.spinner("Generating Questions..."):
+                quiz = generate_quiz(selected_summary["summary"])
+                st.session_state.quiz = quiz
+                st.session_state.selected_title = selected_title
+                st.session_state.answers = [None] * len(quiz)
+                st.session_state.score = 0
+                st.session_state.lives = 3
+    else:
+        quiz = st.session_state.quiz
+
 
         if game_mode == "💣 Defuse the Bomb":
             st.subheader("💣 Defuse the Bomb")
@@ -201,8 +212,8 @@ if selected_title != "None" and game_mode != "None":
 
         elif game_mode == "🧟 Survival Mode":
             st.subheader("🧟 Survival Mode")
-            lives = 3
-            score = 0
+            lives = st.session_state.lives
+            score = st.session_state.score
             for i, (q, opts, ans) in enumerate(quiz):
                 st.markdown(f"**{i+1}. {q}**")
                 choice = st.radio("", opts, key=f"survival_{i}")
@@ -216,6 +227,8 @@ if selected_title != "None" and game_mode != "None":
                         if lives == 0:
                             st.warning("🧟 You didn't survive...")
                             break
+                    st.session_state.score = score
+                    st.session_state.lives = lives
                     st.info(f"Lives left: {lives}")
             if lives > 0:
                 st.success(f"🎉 You survived! Score: {score}/{len(quiz)}")
