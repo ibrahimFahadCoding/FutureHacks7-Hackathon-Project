@@ -6,15 +6,15 @@ from utils.db import load_summaries
 from together import Together
 
 # Setup
-st.set_page_config(page_title="Quiz Modes", page_icon="🎮")
-st.title("🎮 Defuse the Bomb or Chill")
+st.set_page_config(page_title="😎 Quiz Modes", page_icon="😎")
+st.title("😎 Defuse the Bomb or Chill")
 
 # Get Username and Summaries
 username = st.session_state.get("username", "guest")
 summaries = load_summaries().get(username, [])
 
 # LLaMA API
-llama = Together(api_key="5bd126d37c96a0f67f1e75a0ae0f8f959fcee795b32df2fedd56547e5127b7dd")
+llama = Together(api_key="YOUR_TOGETHER_API_KEY")
 
 def llama_generate_mcqs(summary):
     prompt = f"""
@@ -40,7 +40,7 @@ def llama_generate_mcqs(summary):
     return response.choices[0].message.content
 
 # Game Mode Choice
-mode = st.radio("Choose Your Mode", ["💣 Defuse the Bomb", "😎️ Chill Mode"])
+mode = st.radio("Choose Your Mode", ["💣 Defuse the Bomb", "😎 Chill Mode"])
 
 # Pick a summary
 if not summaries:
@@ -52,7 +52,7 @@ selected_title = st.selectbox("Pick a Summary to Quiz On", summary_titles)
 summary_text = next(s['summary'] for s in summaries if s['title'] == selected_title)
 
 # Generate MCQs
-if st.button("Start Quiz"):
+if 'questions' not in st.session_state and st.button("Start Quiz"):
     with st.spinner("Generating Questions..."):
         try:
             mcqs_raw = llama_generate_mcqs(summary_text)
@@ -69,43 +69,89 @@ if st.button("Start Quiz"):
                     "options": options,
                     "correct": correct_index
                 })
+            st.session_state.questions = questions
+            st.session_state.current_q = 0
+            st.session_state.score = 0
+            st.session_state.lives = 1 if mode == "💣 Defuse the Bomb" else 999
         except Exception as e:
             st.error(f"Error generating quiz: {e}")
             st.stop()
 
-    # Gameplay
-    score = 0
-    lives = 1 if mode == "💣 Defuse the Bomb" else 999
-    wire_colors = ["red", "blue", "green", "yellow"]
-    color_to_code = {"red": "#FF4136", "blue": "#0074D9", "green": "#2ECC40", "yellow": "#FFDC00"}
+if 'questions' in st.session_state:
+    questions = st.session_state.questions
+    q_idx = st.session_state.current_q
+    score = st.session_state.score
+    lives = st.session_state.lives
 
-    for idx, q in enumerate(questions):
-        st.subheader(f"Question {idx + 1}")
+    if q_idx < len(questions) and lives > 0:
+        q = questions[q_idx]
+        st.subheader(f"Question {q_idx + 1}")
         st.markdown(f"**{q['question']}**")
-        chosen = st.radio("Choose your answer:", q['options'], index=None, key=f"q_{idx}")
 
-        if chosen:
-            correct = q['options'][q['correct']]
-            if chosen == correct:
-                score += 1
-                if mode == "💣 Defuse the Bomb":
-                    wire_choice = random.choice(wire_colors)
-                    wire_text = f"**<span style='color:{color_to_code[wire_choice]}'>Cut the {wire_choice} wire</span>**"
-                    st.markdown(wire_text, unsafe_allow_html=True)
-                    if random.random() < 0.25:
-                        st.error("💥 You chose the wrong wire. Boom!")
-                        break
+        timer_placeholder = st.empty()
+        choice_placeholder = st.empty()
+        wire_placeholder = st.empty()
+        result_placeholder = st.empty()
+
+        start_time = time.time()
+        answered = False
+
+        while time.time() - start_time < 10 and not answered:
+            remaining = int(10 - (time.time() - start_time))
+            timer_placeholder.markdown(f"⏱️ Time left: {remaining}s")
+            chosen = choice_placeholder.radio("", q['options'], index=None, key=f"q_{q_idx}")
+            if chosen:
+                answered = True
+                correct = q['options'][q['correct']]
+                if chosen == correct:
+                    st.session_state.score += 1
+                    if mode == "💣 Defuse the Bomb":
+                        wire_colors = ["red", "blue", "green", "yellow"]
+                        color_to_code = {
+                            "red": "#FF4136",
+                            "blue": "#0074D9",
+                            "green": "#2ECC40",
+                            "yellow": "#FFDC00"
+                        }
+                        correct_wire = random.choice(wire_colors)
+                        chosen_wire = st.radio("Which wire do you want to cut?", wire_colors, format_func=lambda x: f"{x.capitalize()} wire", key=f"wire_{q_idx}")
+                        wire_color_text = f"<span style='color:{color_to_code[chosen_wire]}; font-weight:bold;'>{chosen_wire.capitalize()} wire</span>"
+                        wire_placeholder.markdown(f"You chose to cut the {wire_color_text}.", unsafe_allow_html=True)
+
+                        if chosen_wire != correct_wire:
+                            result_placeholder.error("💥 Wrong wire! Boom!")
+                            st.session_state.lives = 0
+                            break
+                        else:
+                            result_placeholder.success("✅ Safe wire! Moving on!")
                     else:
-                        st.success("✅ Wire cut safely. Moving on!")
+                        result_placeholder.success("✅ Correct!")
                 else:
-                    st.success("✅ Correct!")
-            else:
-                st.error(f"❌ Wrong. The correct answer was: {correct}")
-                if mode == "💣 Defuse the Bomb":
-                    st.error("💥 Boom! Game Over.")
-                    break
+                    result_placeholder.error(f"❌ Wrong. The correct answer was: {correct}")
+                    if mode == "💣 Defuse the Bomb":
+                        result_placeholder.error("💥 Boom! Game Over.")
+                        st.session_state.lives = 0
+                        break
+            time.sleep(0.25)
 
-            time.sleep(1.5)
+        if not answered:
+            result_placeholder.error("⏰ Time's up! Boom!")
+            st.session_state.lives = 0
 
-    st.subheader("Final Score")
-    st.markdown(f"**{score} / {len(questions)}**")
+        st.session_state.current_q += 1
+
+    if st.session_state.lives > 0 and st.session_state.current_q >= len(st.session_state.questions):
+        st.subheader("Final Score")
+        st.markdown(f"**{st.session_state.score} / {len(st.session_state.questions)}**")
+        del st.session_state.questions
+        del st.session_state.current_q
+        del st.session_state.score
+        del st.session_state.lives
+
+    if st.session_state.lives <= 0:
+        st.subheader("💀 Game Over")
+        st.markdown(f"**Final Score: {st.session_state.score} / {len(st.session_state.questions)}**")
+        del st.session_state.questions
+        del st.session_state.current_q
+        del st.session_state.score
+        del st.session_state.lives
