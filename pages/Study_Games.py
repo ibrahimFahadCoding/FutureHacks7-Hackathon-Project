@@ -14,7 +14,7 @@ username = st.session_state.get("username", "guest")
 summaries = load_summaries().get(username, [])
 
 # LLaMA API
-llama = Together(api_key="YOUR_TOGETHER_API_KEY")
+llama = Together(api_key="5bd126d37c96a0f67f1e75a0ae0f8f959fcee795b32df2fedd56547e5127b7dd")
 
 def llama_generate_mcqs(summary):
     prompt = f"""
