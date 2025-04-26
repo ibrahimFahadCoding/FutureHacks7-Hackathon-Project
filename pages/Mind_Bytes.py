@@ -166,7 +166,7 @@ if extracted_text:
                     - **Avoid vague or overly technical language** unless necessary—and if needed, define it briefly and clearly.
                     - **If the text is very long**:
                         - Create a **high-level overview** only.
-                        - **Include no more than 5 bullet points per section**.
+                        - **Include 5-7 bullet points per section**.
                         - Focus on the **very important concepts** and **skip smaller details**.
                         - Keep it under 600 words.
                         - Avoid repetition
