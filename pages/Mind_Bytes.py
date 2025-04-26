@@ -211,7 +211,8 @@ if extracted_text:
                 save_summary(username, raw_title, final_summary_md)
 
                 # Create and serve PDF
-                pdf_filename = f"summary_{re.sub(r'\\W+', '_', raw_title.lower())[:40]}.pdf"
+                safe_title = re.sub(r'\W+', '_', raw_title.lower())[:40]
+                pdf_filename = f"summary_{safe_title}.pdf"
                 pdf_path = save_markdown_pdf(final_summary_md, raw_title, pdf_filename)
 
                 st.success(f"PDF Generated: `{pdf_filename}`")
