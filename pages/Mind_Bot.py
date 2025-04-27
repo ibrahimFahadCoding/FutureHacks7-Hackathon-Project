@@ -1,11 +1,11 @@
 import streamlit as st
-from together import Together
+from mistralai import Mistral
 
 #Page Config with Together API Setup
 st.set_page_config(page_title="Mind Bot", layout="centered", page_icon="💬")
 st.title("💬 Mind Chatbot")
 
-together_client = Together(api_key="5bd126d37c96a0f67f1e75a0ae0f8f959fcee795b32df2fedd56547e5127b7dd")
+client = Mistral(api_key="CxXUpnz9TPqQvH2yDayDDNb97yH4BVbt")
 
 #Initialize Chat History
 if "chat_history" not in st.session_state:
@@ -34,8 +34,8 @@ if user_input:
     with st.chat_message("assistant", avatar="🧠"):
         with st.spinner("Thinking..."):
             try:
-                response = together_client.chat.completions.create(
-                    model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
+                response = client.chat.complete(
+                    model="mistral-large-latest",
                     messages=st.session_state.chat_history,
                     temperature=0.7
                 ).choices[0].message.content

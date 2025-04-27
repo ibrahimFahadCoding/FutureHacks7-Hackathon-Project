@@ -1,6 +1,6 @@
 import streamlit as st
 from google.cloud import vision
-from together import Together
+from mistralai import Mistral
 from PIL import Image
 import os
 from pathlib import Path
@@ -14,7 +14,6 @@ from google.oauth2 import service_account
 import random
 import json
 import time
-from together.error import TogetherException
 
 # Page Config
 st.set_page_config(page_title="Mind Bytes", layout="centered", page_icon="📝")
@@ -22,7 +21,7 @@ st.title("Mind Bytes")
 st.caption("""Gimme whatever it is you don't understand and get back a summary! 📝""")
 
 # API Clients
-together_client = Together(api_key="5bd126d37c96a0f67f1e75a0ae0f8f959fcee795b32df2fedd56547e5127b7dd")
+client = Mistral(api_key="CxXUpnz9TPqQvH2yDayDDNb97yH4BVbt")
 googlecreds = dict(st.secrets["google_credentials"])
 creds = service_account.Credentials.from_service_account_info(googlecreds)
 
@@ -30,13 +29,13 @@ creds = service_account.Credentials.from_service_account_info(googlecreds)
 username = st.session_state.get("username", "guest")
 
 # LLaMA Function
-def llama_chat(prompt, system=None):
+def mistral_chat(prompt, system=None):
     msgs = []
     if system:
         msgs.append({"role": "system", "content": system})
     msgs.append({"role": "user", "content": prompt})
-    response = together_client.chat.completions.create(
-        model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
+    response = client.chat.complete(
+        model="mistral-large-latest",
         messages=msgs,
         temperature=0.4
     )
@@ -167,7 +166,7 @@ if extracted_text:
                     - **If the text is very long**:
                         - Create a **high-level overview** only.
                         - **Include 5-7 bullet points per section**.
-                        - Focus on the **very important concepts** and **skip smaller details**.
+                        - Focus on the **very important concepts** and **include smaller details ONLY if possible**.
                         - Keep it under 600 words.
                         - Avoid repetition
                         - Include examples for each topic using a nested bullet point.
@@ -176,7 +175,7 @@ if extracted_text:
                     Text chunk ({i+1}/{len(chunks)}):
                     {chunk}
                     """
-                    summaries.append(llama_chat(summary_prompt))
+                    summaries.append(mistral_chat(summary_prompt))
 
                 # Combine all summaries
                 final_summary_md = "\n\n---\n\n".join(summaries)
@@ -195,7 +194,7 @@ if extracted_text:
                     Current summary:
                     {final_summary_md}
                     """
-                    final_summary_md = llama_chat(re_summary_prompt)
+                    final_summary_md = mistral_chat(re_summary_prompt)
 
                 # Displaying AI-generated summary (after possible re-summarizing)
                 st.subheader("AI Generated Summary")
@@ -204,7 +203,7 @@ if extracted_text:
                 # Generate a concise title
                 title_prompt = f"""Give a short and clear title (max 6 words) for this summary. No punctuation.
                 Summary: {final_summary_md}"""
-                raw_title = llama_chat(title_prompt).strip()
+                raw_title = mistral_chat(title_prompt).strip()
                 st.session_state["summary_title"] = raw_title
 
                 # Save to database
@@ -220,7 +219,7 @@ if extracted_text:
                     st.download_button("Download PDF", data=f, file_name=pdf_filename, mime="application/pdf")
 
 
-            except TogetherException as e:
+            except Exception as e:
 
                 error_message = str(e)
 
