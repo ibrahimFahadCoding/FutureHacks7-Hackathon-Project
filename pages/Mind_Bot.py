@@ -5,14 +5,13 @@ from mistralai import Mistral
 st.set_page_config(page_title="Mind Bot", layout="centered", page_icon="💬")
 st.title("💬 Mind Chatbot")
 
-client = Mistral(api_key="CxXUpnz9TPqQvH2yDayDDNb97yH4BVbt")
+mistral = Mistral(api_key="CxXUpnz9TPqQvH2yDayDDNb97yH4BVbt")
 
 #Initialize Chat History
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = [
         {"role": "system", "content": """You are a helpful, friendly AI whos job is to answer questions about anything. 
-        Feel free to add in a little humor. Explain concepts and provide examples in math, science, and 
-        coding problems."""}
+        Feel free to add in a tiny bit humor. But don't be cringey. Also your name is Neuro!"""}
     ]
 
 for msg in st.session_state.chat_history:
@@ -34,7 +33,7 @@ if user_input:
     with st.chat_message("assistant", avatar="🧠"):
         with st.spinner("Thinking..."):
             try:
-                response = client.chat.complete(
+                response = mistral.chat.complete(
                     model="mistral-large-latest",
                     messages=st.session_state.chat_history,
                     temperature=0.7
