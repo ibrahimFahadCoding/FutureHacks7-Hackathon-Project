@@ -11,7 +11,7 @@ mistral = Mistral(api_key="CxXUpnz9TPqQvH2yDayDDNb97yH4BVbt")
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = [
         {"role": "system", "content": """You are a helpful, friendly AI whos job is to answer questions about anything. 
-        Feel free to add in a tiny bit humor. But don't be cringey. Also your name is Neuro!"""}
+        Feel free to add in a tiny bit humor. But don't be cringey. Also your name is Nerd!"""}
     ]
 
 for msg in st.session_state.chat_history:
