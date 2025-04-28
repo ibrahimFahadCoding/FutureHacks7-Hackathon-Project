@@ -16,9 +16,9 @@ import json
 import time
 
 # Page Config
-st.set_page_config(page_title="Mind Bytes", layout="centered", page_icon="📝")
-st.title("Mind Bytes")
-st.caption("""Gimme whatever it is you don't understand and get back a summary! 📝""")
+st.set_page_config(page_title="Mind Bytes", layout="centered", page_icon="📓")
+st.title("📓 Mind Bytes")
+st.caption("""Gimme whatever it is you don't understand and get back notes! 📓""")
 
 # API Clients
 mistral = Mistral(api_key="CxXUpnz9TPqQvH2yDayDDNb97yH4BVbt")
@@ -145,9 +145,9 @@ if username:
 
     # Generate Summary Button
     if extracted_text:
-        if st.button("Generate Summary with LLaMA 3"):
+        if st.button("Generate Notes with Nerd"):
             info_msg = st.info("")
-            with st.spinner("Generating Summary..."):
+            with st.spinner("Generating Notes..."):
                 try:
                     chunks = split_text_into_chunks(extracted_text, max_words=2000)
                     summaries = []
@@ -198,7 +198,7 @@ if username:
                         final_summary_md = mistral_chat(re_summary_prompt)
 
                     # Displaying AI-generated summary (after possible re-summarizing)
-                    st.subheader("AI Generated Summary")
+                    st.subheader("AI Generated Notes")
                     st.markdown(final_summary_md)
 
                     # Generate a concise title
@@ -212,7 +212,7 @@ if username:
 
                     # Create and serve PDF
                     safe_title = re.sub(r'\W+', '_', raw_title.lower())[:40]
-                    pdf_filename = f"summary_{safe_title}.pdf"
+                    pdf_filename = f"notes_{safe_title}.pdf"
                     pdf_path = save_markdown_pdf(final_summary_md, raw_title, pdf_filename)
 
                     st.success(f"PDF Generated: `{pdf_filename}`")
