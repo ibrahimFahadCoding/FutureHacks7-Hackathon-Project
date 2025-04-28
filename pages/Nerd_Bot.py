@@ -2,7 +2,7 @@ import streamlit as st
 from mistralai import Mistral
 
 #Page Config with Together API Setup
-st.set_page_config(page_title="Mind Bot", layout="centered", page_icon="💬")
+st.set_page_config(page_title="Nerd Bot", layout="centered", page_icon="💬")
 st.title("💬 Nerd Bot")
 
 mistral = Mistral(api_key="CxXUpnz9TPqQvH2yDayDDNb97yH4BVbt")
