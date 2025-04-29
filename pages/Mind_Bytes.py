@@ -14,6 +14,8 @@ from google.oauth2 import service_account
 import random
 import json
 import time
+from pytube import YouTube
+from youtube_transcript_api import YouTubeTranscriptApi
 
 # Page Config
 st.set_page_config(page_title="Mind Bytes", layout="centered", page_icon="📓")
@@ -96,7 +98,7 @@ MAX_WORD_COUNT = 1000
 
 if username:
     # Input Option
-    photo_option = st.radio("Choose how you'd like to capture the text: ", ["Upload an Image", "Take Live Photo", "Upload PDF", "Paste Text"])
+    photo_option = st.radio("Choose how you'd like to capture the text: ", ["Upload an Image", "Take Live Photo", "Upload PDF", "Paste Text", "Give YT URL"])
 
     image_bytes = None
     extracted_text = ""
@@ -122,7 +124,20 @@ if username:
             st.text_area("Extracted Text from PDF", extracted_text, height=200)
 
     elif photo_option == "Paste Text":
-        extracted_text = st.text_input(label='marhaba', label_visibility="hidden", placeholder="Enter Text Here...")
+        extracted_text = st.text_input(label='Enter Summary: ')
+
+
+    elif photo_option == "Give YT URL":
+        video_url = st.text_input(label="Enter YT Link:")
+        if video_url:
+            try:
+                yt = YouTube(video_url)
+                video_ID = yt.video_id
+                transcript_api = YouTubeTranscriptApi()
+                transcript_list = YouTubeTranscriptApi.get_transcript(video_ID)
+                extracted_text = " ".join([entry['text'] for entry in transcript_list])
+            except Exception as e:
+                st.error(f"Error Occurred: {e}")
 
     # Google Vision for Images
     if image_bytes:
