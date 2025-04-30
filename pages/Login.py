@@ -26,6 +26,7 @@ else:
                 st.error("Passwords Do Not Match!")
             elif create_user(new_username, new_password):
                 st.success(f"User Created for {new_username} Successfully!")
+                st.balloons()
                 st.session_state["username"] = new_username
             else:
 

@@ -15,7 +15,7 @@ import random
 import json
 import time
 from pytube import YouTube
-from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled
 
 # Page Config
 st.set_page_config(page_title="Mind Bytes", layout="centered", page_icon="📓")
@@ -98,7 +98,7 @@ MAX_WORD_COUNT = 1000
 
 if username:
     # Input Option
-    photo_option = st.radio("Choose how you'd like to capture the text: ", ["Upload an Image", "Take Live Photo", "Upload PDF", "Paste Text", "Give YT URL"])
+    photo_option = st.selectbox("Choose how you'd like to capture the text: ", ["Upload an Image", "Take Live Photo", "Upload PDF", "Paste Text", "Give YT URL"])
 
     image_bytes = None
     extracted_text = ""
@@ -133,9 +133,13 @@ if username:
             try:
                 yt = YouTube(video_url)
                 video_ID = yt.video_id
-                transcript_api = YouTubeTranscriptApi()
-                transcript_list = YouTubeTranscriptApi.get_transcript(video_ID)
-                extracted_text = " ".join([entry['text'] for entry in transcript_list])
+
+                # Correct usage
+                transcript = YouTubeTranscriptApi.get_transcript(video_ID)
+                extracted_text = " ".join([entry["text"] for entry in transcript])
+
+                st.text_area("Transcript", extracted_text, height=300)
+
             except Exception as e:
                 st.error(f"Error Occurred: {e}")
 
@@ -180,17 +184,17 @@ if username:
                         - **Avoid copying the text verbatim**—rephrase and explain for clarity and better retention.
                         - **Avoid vague or overly technical language** unless necessary—and if needed, define it briefly and clearly.
                         - **If the text is very long**:
-                            - Create a **high-level overview** only.
-                            - **Include 5-7 bullet points per section**.
-                            - Focus on the **very important concepts** and **include smaller details ONLY if possible**.
-                            - Keep it under 600 words.
+                            - Explain in as much detail as possible.
+                            - Provide examples.
+                            - If there is a process or algorithm, walk through every step and explain it.
                             - Avoid repetition
                             - Include examples for each topic using a nested bullet point.
-                        - Focus on **summarizing only the most important concepts**, avoid detailed descriptions unless necessary.
+                        
     
-                        Text chunk ({i+1}/{len(chunks)}):
+                        Text chunk ({i + 1}/{len(chunks)}):
                         {chunk}
-                        """
+                                                """
+
                         summaries.append(mistral_chat(summary_prompt))
 
                     # Combine all summaries
@@ -199,8 +203,6 @@ if username:
 
                     # Check word count of the final summary
                     if count_words(final_summary_md) > MAX_WORD_COUNT:
-                        #st.warning(f"Summary is over {MAX_WORD_COUNT} words. Re-summarizing to make it more concise...")
-                        # Re-summarize if the summary is too long
                         re_summary_prompt = f"""
                         You are an expert educational assistant that helps students learn by summarizing complex information into clear, organized, and engaging study notes.
     
