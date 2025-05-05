@@ -190,6 +190,7 @@ if username:
                             - Avoid repetition
                             - Include examples for each topic using a nested bullet point.
                             - ENSURE EVERYTHING IS CORRECT. DOUBLE CHECK EVERYTHING.
+                            - Use symbols wherever possible to make it less wordy.
                         
     
                         Text chunk ({i + 1}/{len(chunks)}):
