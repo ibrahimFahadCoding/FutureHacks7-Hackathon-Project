@@ -186,6 +186,7 @@ if username:
                         - **If the text is very long**:
                             - Explain in as much detail as possible.
                             - Provide examples.
+                            - Define terms and complex words.
                             - If there is a process or algorithm, walk through every step and explain it.
                             - Avoid repetition
                             - Include examples for each topic using a nested bullet point.
