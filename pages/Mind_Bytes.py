@@ -185,6 +185,7 @@ if username:
                         - **Avoid vague or overly technical language** unless necessary—and if needed, define it briefly and clearly.
                         - **If the text is very long**:
                             - Explain in as much detail as possible.
+                            - Go further in depth than the text chunk.
                             - Provide examples.
                             - Define terms and complex words.
                             - If there is a process or algorithm, walk through every step and explain it.
