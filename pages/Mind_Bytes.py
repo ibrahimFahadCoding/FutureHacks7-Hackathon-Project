@@ -189,6 +189,7 @@ if username:
                             - If there is a process or algorithm, walk through every step and explain it.
                             - Avoid repetition
                             - Include examples for each topic using a nested bullet point.
+                            - ENSURE EVERYTHING IS CORRECT. DOUBLE CHECK EVERYTHING.
                         
     
                         Text chunk ({i + 1}/{len(chunks)}):
