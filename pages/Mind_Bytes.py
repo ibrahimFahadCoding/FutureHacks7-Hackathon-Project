@@ -189,6 +189,7 @@ if username:
                             - If there is a process or algorithm, walk through every step and explain it.
                             - Avoid repetition
                             - Include examples for each topic using a nested bullet point.
+                            - Provide logical reasoning.
                             - ENSURE EVERYTHING IS CORRECT. DOUBLE CHECK EVERYTHING.
                             - Use symbols wherever possible to make it less wordy.
                         
