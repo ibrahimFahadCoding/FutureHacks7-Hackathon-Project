@@ -178,6 +178,7 @@ if username:
     
                         Summarize the following text using the following format:
                         - Use **clear, student-friendly language**.
+                        - Use **TONS of emojis EVERYWHERE** for **colorful, fun, and engaging notes**.
                         - Organize the summary with **meaningful subheadings**.
                         - Present ideas in **concise bullet points**, grouped logically under the subheadings.
                         - Where appropriate, use **nested bullets** to break down more detailed ideas simply.
