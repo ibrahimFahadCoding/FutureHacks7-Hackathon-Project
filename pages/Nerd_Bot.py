@@ -5,13 +5,14 @@ from mistralai import Mistral
 st.set_page_config(page_title="Nerd Bot", layout="centered", page_icon="💬")
 st.title("💬 Nerd Bot")
 
+personality = st.text_input("What should my personality be? ")
+
 mistral = Mistral(api_key="CxXUpnz9TPqQvH2yDayDDNb97yH4BVbt")
 
 #Initialize Chat History
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = [
-        {"role": "system", "content": """You are a helpful, friendly AI whos job is to answer questions about anything. 
-        Ensure everything is correct. Triple check everything. Provide logical reasoning. Also your name is Nerd!"""}
+        {"role": "system", "content": f"{personality}"}
     ]
 
 for msg in st.session_state.chat_history:
