@@ -7,13 +7,15 @@ st.title("💬 Nerd Bot")
 
 personality = st.text_input("What should my personality be? ")
 
+
 mistral = Mistral(api_key="CxXUpnz9TPqQvH2yDayDDNb97yH4BVbt")
 
 #Initialize Chat History
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = [
-        {"role": "system", "content": f"{personality}"}
-    ]
+if st.button("Apply Personality"):
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = [
+            {"role": "system", "content": f"{personality}"}
+        ]
 
 for msg in st.session_state.chat_history:
     if msg["role"] == "user":
