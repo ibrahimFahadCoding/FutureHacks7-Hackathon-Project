@@ -22,7 +22,7 @@ for msg in st.session_state.chat_history:
         with st.chat_message("user", avatar="🙂"):
             st.markdown(msg["content"])
     elif msg["role"] == "assistant":
-        with st.chat_message("assistant", avatar="🤓"):
+        with st.chat_message("assistant", avatar="😁"):
             st.markdown(msg["content"])
 
 #Chat Input
